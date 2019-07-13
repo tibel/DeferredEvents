@@ -18,7 +18,7 @@ namespace DeferredEvents
             if (!cancellationToken.IsCancellationRequested)
                 return Task.FromCanceled(new CancellationToken(true));
 
-            if (eventHandler == null)
+            if (!(eventHandler is object))
                 return Task.CompletedTask;
 
             eventHandler(sender, eventArgs);

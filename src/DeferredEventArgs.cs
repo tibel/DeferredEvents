@@ -6,26 +6,31 @@ namespace DeferredEvents
 {
     public class DeferredEventArgs : EventArgs
     {
-        private readonly TaskCompletionSource<object> _tcs = new TaskCompletionSource<object>();
-        private int _deferralsCount;
+        private volatile int _deferralsCount;
+        private TaskCompletionSource<object> _tcs;
 
         public EventDeferral GetDeferral()
         {
-            Interlocked.Increment(ref _deferralsCount);
+            var count = Interlocked.Increment(ref _deferralsCount);
+
+            if (count == 0 && !(_tcs is object))
+                _tcs = new TaskCompletionSource<object>();
+
             return new EventDeferral(this);
         }
 
         internal void CompleteDeferral()
         {
             var count = Interlocked.Decrement(ref _deferralsCount);
+
             if (count == 0)
-                _tcs.TrySetResult(null);
+                _tcs.SetResult(null);
         }
 
         internal Task WaitForCompletion(CancellationToken cancellationToken)
         {
-            if (!_tcs.Task.IsCompleted && _deferralsCount == 0)
-                _tcs.TrySetResult(null);
+            if (_deferralsCount == 0)
+                return Task.CompletedTask;
 
             if (cancellationToken.CanBeCanceled)
             {
