@@ -7,9 +7,12 @@ namespace DeferredEvents
     {
         private DeferredEventArgs _eventArgs;
 
-        internal EventDeferral(DeferredEventArgs eventArgs)
+        public CancellationToken CancellationToken { get; }
+
+        internal EventDeferral(DeferredEventArgs eventArgs, CancellationToken cancellationToken)
         {
             _eventArgs = eventArgs;
+            CancellationToken = cancellationToken;
         }
 
         public void Complete()

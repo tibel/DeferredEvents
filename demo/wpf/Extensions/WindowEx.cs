@@ -9,8 +9,11 @@ namespace WpfDeferredEvents
     public class WindowEx : Window
     {
         private bool _actuallyClosing;
+        private bool _deferredClosing;
 
         public new event EventHandler<ClosingEventArgs> Closing;
+
+        //TODO read-only dependency property IsClosing
 
         protected override void OnClosing(CancelEventArgs e)
         {
@@ -19,6 +22,9 @@ namespace WpfDeferredEvents
                 _actuallyClosing = false;
                 return;
             }
+
+            if (_deferredClosing)
+                return;
 
             base.OnClosing(e);
 
@@ -32,6 +38,7 @@ namespace WpfDeferredEvents
             else
             {
                 e.Cancel = true;
+                _deferredClosing = true;
                 DeferredClose(deferredEvent, closingEventArgs);
             }
         }
@@ -39,6 +46,9 @@ namespace WpfDeferredEvents
         private async void DeferredClose(Task deferredEvent, ClosingEventArgs closingEventArgs)
         {
             await deferredEvent.ConfigureAwait(true);
+
+            _deferredClosing = false;
+
             if (closingEventArgs.Cancel)
                 return;
 
