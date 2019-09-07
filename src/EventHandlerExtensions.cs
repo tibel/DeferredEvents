@@ -15,7 +15,7 @@ namespace DeferredEvents
         public static Task InvokeAsync<T>(this EventHandler<T> eventHandler, object sender, T eventArgs, CancellationToken cancellationToken)
             where T : DeferredEventArgs
         {
-            if (!cancellationToken.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
                 return Task.FromCanceled(new CancellationToken(true));
 
             if (!(eventHandler is object))

@@ -13,7 +13,7 @@ namespace DeferredEvents
         {
             var count = Interlocked.Increment(ref _deferralsCount);
 
-            if (count == 0 && !(_tcs is object))
+            if (count == 1 && !(_tcs is object))
                 _tcs = new TaskCompletionSource<object>();
 
             return new EventDeferral(this);
@@ -24,7 +24,7 @@ namespace DeferredEvents
             var count = Interlocked.Decrement(ref _deferralsCount);
 
             if (count == 0)
-                _tcs.SetResult(null);
+                _tcs.TrySetResult(null);
         }
 
         internal Task WaitForCompletion(CancellationToken cancellationToken)
