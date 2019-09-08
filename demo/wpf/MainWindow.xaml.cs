@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace WpfDeferredEvents
+namespace DeferredEvents.WPF
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

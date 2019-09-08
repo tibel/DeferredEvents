@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace WpfDeferredEvents
+namespace DeferredEvents.WPF
 {
     public class WindowEx : Window
     {
@@ -12,8 +12,6 @@ namespace WpfDeferredEvents
         private bool _deferredClosing;
 
         public new event EventHandler<ClosingEventArgs> Closing;
-
-        //TODO read-only dependency property IsClosing
 
         protected override void OnClosing(CancelEventArgs e)
         {

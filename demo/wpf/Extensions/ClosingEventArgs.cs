@@ -1,6 +1,6 @@
 ﻿using DeferredEvents;
 
-namespace WpfDeferredEvents
+namespace DeferredEvents.WPF
 {
     public class ClosingEventArgs : DeferredEventArgs
     {

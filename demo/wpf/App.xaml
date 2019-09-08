@@ -1,7 +1,7 @@
-﻿<Application x:Class="WpfDeferredEvents.App"
+﻿<Application x:Class="DeferredEvents.WPF.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:WpfDeferredEvents"
+             xmlns:local="clr-namespace:DeferredEvents.WPF"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          
