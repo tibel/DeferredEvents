@@ -4,7 +4,8 @@ using System.Threading;
 
 namespace DeferredEvents.Tests
 {
-    [TestFixture(TestOf = typeof(DeferredEventArgs))]
+    [TestFixture]
+    [TestOf(typeof(DeferredEventArgs))]
     public class DeferredEventArgsTests
     {
         [Test]

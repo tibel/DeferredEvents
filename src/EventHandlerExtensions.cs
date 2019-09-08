@@ -15,7 +15,10 @@ namespace DeferredEvents
         public static Task InvokeAsync<T>(this EventHandler<T> eventHandler, object sender, T eventArgs, CancellationToken cancellationToken)
             where T : DeferredEventArgs
         {
-            if (eventHandler == null)
+            if (eventArgs is null)
+                ThrowArgumentNullException(nameof(eventArgs));
+
+            if (eventHandler is null)
             {
                 return Task.CompletedTask;
             }
@@ -25,6 +28,11 @@ namespace DeferredEvents
                 eventHandler(sender, eventArgs);
                 return eventArgs.EndInvoke();
             }
+        }
+
+        private static void ThrowArgumentNullException(string paramName)
+        {
+            throw new ArgumentNullException(paramName);
         }
     }
 }
