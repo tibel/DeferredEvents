@@ -20,6 +20,7 @@ namespace DeferredEvents
 
             if (eventHandler is null)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 return Task.CompletedTask;
             }
             else

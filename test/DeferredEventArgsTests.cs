@@ -93,6 +93,7 @@ namespace DeferredEvents.Tests
             Assert.IsFalse(task.IsCompleted);
 
             cts.Cancel();
+            cts.Dispose();
 
             Assert.IsTrue(task.IsCanceled);
         }
