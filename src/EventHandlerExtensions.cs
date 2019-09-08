@@ -15,9 +15,16 @@ namespace DeferredEvents
         public static Task InvokeAsync<T>(this EventHandler<T> eventHandler, object sender, T eventArgs, CancellationToken cancellationToken)
             where T : DeferredEventArgs
         {
-            eventArgs.BeginInvoke(cancellationToken);
-            eventHandler?.Invoke(sender, eventArgs);
-            return eventArgs.EndInvoke();
+            if (eventHandler == null)
+            {
+                return Task.CompletedTask;
+            }
+            else
+            {
+                eventArgs.BeginInvoke(cancellationToken);
+                eventHandler(sender, eventArgs);
+                return eventArgs.EndInvoke();
+            }
         }
     }
 }

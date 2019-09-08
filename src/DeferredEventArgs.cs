@@ -6,52 +6,46 @@ namespace DeferredEvents
 {
     public class DeferredEventArgs : EventArgs
     {
-        private const int NEW        = 0;
-        private const int ACTIVE     = 1;
-        private const int COMPLETING = 2;
-        private const int COMPLETED  = 3;
-
         private volatile int _deferralsCount;
-        private volatile int _state;
-
-        private TaskCompletionSource<object> _tcs;
         private CancellationToken _cancellationToken;
+        private TaskCompletionSource<object> _tcs;
 
         public EventDeferral GetDeferral()
         {
-            if (_state != ACTIVE)
-                throw new InvalidOperationException("Cannot get event deferral after event started completing");
-
             _cancellationToken.ThrowIfCancellationRequested();
-            Interlocked.Increment(ref _deferralsCount);
+
+            var count = Interlocked.Increment(ref _deferralsCount);
+            if (count < 2)
+                ThrowEventNotActiveException();
+
             return new EventDeferral(this, _cancellationToken);
         }
 
         internal void CompleteDeferral()
         {
             var count = Interlocked.Decrement(ref _deferralsCount);
-            if (count == 0 && Interlocked.CompareExchange(ref _state, COMPLETED, COMPLETING) == COMPLETING)
+            if (count < 1)
                 _tcs.TrySetResult(null);
         }
 
         internal void BeginInvoke(CancellationToken cancellationToken)
         {
-            if (_state != NEW)
-                throw new InvalidOperationException("Cannot re-use deferred event args");
+            if (_deferralsCount > 0)
+                ThrowEventActiveException();
 
             cancellationToken.ThrowIfCancellationRequested();
+
             _cancellationToken = cancellationToken;
-            _state = ACTIVE;
+            _tcs = null;
+            _deferralsCount = 1;
         }
 
         internal Task EndInvoke()
         {
-            if (_deferralsCount != 0)
+            if (_deferralsCount > 1)
                 _tcs = new TaskCompletionSource<object>();
 
-            _state = COMPLETING;
-
-            if (_deferralsCount == 0 && Interlocked.CompareExchange(ref _state, COMPLETED, COMPLETING) == COMPLETING)
+            if (Interlocked.Decrement(ref _deferralsCount) < 1)
                 return _cancellationToken.IsCancellationRequested ? Task.FromCanceled(_cancellationToken) : Task.CompletedTask;
 
             if (_cancellationToken.CanBeCanceled)
@@ -61,6 +55,16 @@ namespace DeferredEvents
             }
 
             return _tcs.Task;
+        }
+
+        private static void ThrowEventNotActiveException()
+        {
+            throw new InvalidOperationException("Cannot get event deferral when event is not active");
+        }
+
+        private static void ThrowEventActiveException()
+        {
+            throw new InvalidOperationException("Event already active or not completed");
         }
     }
 }
