@@ -42,11 +42,10 @@ namespace DeferredEvents
 
         internal Task EndInvoke()
         {
-            if (_deferralsCount > 1)
-                _tcs = new TaskCompletionSource<object>();
-
             if (Interlocked.Decrement(ref _deferralsCount) < 1)
                 return _cancellationToken.IsCancellationRequested ? Task.FromCanceled(_cancellationToken) : Task.CompletedTask;
+
+            _tcs = new TaskCompletionSource<object>();
 
             if (_cancellationToken.CanBeCanceled)
             {
